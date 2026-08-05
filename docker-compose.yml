@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kaftani-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kaftani
+      POSTGRES_USER: kaftani
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kaftani-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: kaftani-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - kaftani-network
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: kaftani-auth
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./services/auth-service:/var/www
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - kaftani-network
+
+volumes:
+  postgres_data:
+
+networks:
+  kaftani-network:
+    driver: bridge
