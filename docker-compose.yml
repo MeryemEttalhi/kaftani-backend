@@ -36,6 +36,20 @@ services:
     networks:
       - kaftani-network
 
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: kaftani-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./services/auth-service:/var/www
+    depends_on:
+      - auth-service
+    networks:
+      - kaftani-network
+
 volumes:
   postgres_data:
 
