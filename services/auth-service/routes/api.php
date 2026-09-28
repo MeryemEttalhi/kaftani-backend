@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+
+Route::post('/auth/register', [AuthController::class, 'register']);
 
 Route::get('/health', function () {
     try {

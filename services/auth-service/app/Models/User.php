@@ -2,48 +2,73 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Core\Traits\HasUuid;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasUuid;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+
+    protected $primaryKey = 'id';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
+        'phone',
+        'profile_photo',
+        'birth_date',
+        'gender',
+        'language',
+        'auth_provider',
         'password',
+        'google_id',
+        'google_email',
+        'newsletter_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
+        'refresh_token_hash',
+        'marketing_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'                 => 'hashed',
+            'email_verified'           => 'boolean',
+            'newsletter_active'        => 'boolean',
+            'birth_date'                => 'date',
+            'last_login_at'             => 'datetime',
+            'refresh_token_expires_at'  => 'datetime',
         ];
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class, 'user_id', 'id');
+    }
+
+    public function activeAddresses(): HasMany
+    {
+        return $this->hasMany(Address::class, 'user_id', 'id')
+            ->where('deleted', false);
+    }
+
+    public function otpCodes(): HasMany
+    {
+        return $this->hasMany(OtpCode::class, 'user_id', 'id');
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AuditLog::class, 'user_id', 'id');
     }
 }
